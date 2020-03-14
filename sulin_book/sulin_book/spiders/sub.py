@@ -2,6 +2,7 @@
 import scrapy
 from copy import deepcopy
 import re
+import json
 
 
 class SubSpider(scrapy.Spider):
@@ -43,6 +44,19 @@ class SubSpider(scrapy.Spider):
                     url=item['href'],
                     callback=self.parse_book_detail,
                     meta={'item': deepcopy(item)}
+                )
+
+            #  翻页
+            page_count = int(re.findall(r'param.pageNumbers = "(.*?)";', response.text)[0])
+
+            current_page = int(re.findall(r'param.currentPage = "(.*?)";', response.text)[0])
+            if current_page < page_count:
+                next_url = item['next_url'].format(current_page + 1)
+                # print(next_url)
+                yield scrapy.Request(
+                    url=next_url,
+                    callback=self.parse_book_list,
+                    meta={"item": deepcopy(item)}
                 )
 
     def parse_data(self, data):
