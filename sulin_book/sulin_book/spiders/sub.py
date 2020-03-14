@@ -16,11 +16,13 @@ class SubSpider(scrapy.Spider):
         for menu in menu_list:
             item = {}
             item['menu_item'] = menu.xpath('./dt/h3/a/text()').extract_first()  # 标题
-            item['menu_href'] = menu.xpath('./dt/h3/@href').extract_first()     # 标题url
+            # item['menu_href'] = menu.xpath('./dt/h3/@href').extract_first()     # 标题url
             dd_list = menu.xpath('./dd/a')  # 获得小标签
             for dd in dd_list:
                 item['menu_item'] = dd.xpath('./text()').extract_first()
                 item['menu_href'] = dd.xpath('./@href').extract_first()     # 链接
+                item['ci'] = item['menu_href'][26:32]
+                item['next_url'] = 'https:/list.suning.com/emall/showProductList.do?ci='+item['ci']+'&pg=03&cp={}'
 
                 yield scrapy.Request(
                     url=item['menu_href'],
@@ -36,7 +38,6 @@ class SubSpider(scrapy.Spider):
             item['book_name'] = book_url.xpath("//div[@class='res-img']//a/img/@alt").extract_first()
             item['book_image'] = book_url.xpath("//div[@class='res-img']//a/img/@src2").extract_first()
             item['href'] = book_url.xpath("//div[@class='res-img']//a/@href").extract_first()
-            # print(item['book_name'])
             if item['href'] is not None:
                 item['href'] = 'http:' + item['href']
 
